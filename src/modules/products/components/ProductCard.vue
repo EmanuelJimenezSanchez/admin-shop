@@ -13,7 +13,7 @@ defineProps<Props>();
   >
     <a href="#" class="h-full flex flex-col">
       <div class="relative flex items-end overflow-hidden rounded-xl">
-        <img :src="product.images[0]" alt="Hotel Photo" />
+        <img :src="product.images[0]" alt="Hotel Photo" class="h-[250px] object-cover" />
       </div>
 
       <div class="mt-1 p-2 flex-1 flex flex-col">
