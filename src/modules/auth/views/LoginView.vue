@@ -1,3 +1,51 @@
+<script lang="ts" setup>
+import { reactive, ref, watchEffect } from 'vue';
+import { useAuthStore } from '../stores/auth.store';
+import { useToast } from 'vue-toastification';
+
+const authStore = useAuthStore();
+const toast = useToast();
+const emailInputRef = ref<HTMLInputElement | null>(null);
+const passwordInputRef = ref<HTMLInputElement | null>(null);
+
+const myForm = reactive({
+  email: '',
+  password: '',
+  rememberMe: false,
+});
+
+const onLogin = async () => {
+  if (myForm.email.trim() === '') {
+    return emailInputRef.value?.focus();
+  }
+
+  if (myForm.password.trim() === '') {
+    return passwordInputRef.value?.focus();
+  }
+
+  if (myForm.rememberMe) {
+    localStorage.setItem('email', myForm.email);
+  } else {
+    localStorage.removeItem('email');
+  }
+
+  const ok = await authStore.login(myForm.email, myForm.password);
+
+  if (ok) return;
+
+  toast.error('Usuario/Contraseña incorrectos');
+};
+
+watchEffect(() => {
+  const email = localStorage.getItem('email');
+
+  if (email) {
+    myForm.email = email;
+    myForm.rememberMe = true;
+  }
+});
+</script>
+
 <template>
   <h1 class="text-2xl font-semibold mb-4">Login</h1>
   <form @submit.prevent="onLogin">
@@ -11,6 +59,7 @@
         class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
         autocomplete="off"
         v-model="myForm.email"
+        ref="emailInputRef"
       />
     </div>
     <!-- Password Input -->
@@ -23,6 +72,7 @@
         class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
         autocomplete="off"
         v-model="myForm.password"
+        ref="passwordInputRef"
       />
     </div>
     <!-- Remember Me Checkbox -->
@@ -50,27 +100,6 @@
   </form>
   <!-- Sign up  Link -->
   <div class="mt-6 text-blue-500 text-center">
-    <RouterLink :to="{ name: 'register' }" class="hover:underline">Sign up Here</RouterLink>
+    <RouterLink :to="{ name: 'register' }" class="hover:underline">Crear cuenta aquí</RouterLink>
   </div>
 </template>
-
-<script lang="ts" setup>
-import { reactive } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth.store';
-
-useRouter();
-const authStore = useAuthStore();
-
-const myForm = reactive({
-  email: '',
-  password: '',
-  rememberMe: false,
-});
-
-const onLogin = async () => {
-  const ok = await authStore.login(myForm.email, myForm.password);
-
-  console.log(ok);
-};
-</script>
